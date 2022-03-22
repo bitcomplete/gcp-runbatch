@@ -1,0 +1,38 @@
+project_name: gcp-runbatch
+
+builds:
+  - main: ./cmd/gcp-runbatch
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    ldflags:
+      - -X main.Version={{ .Version }}
+
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      386: i386
+      amd64: x86_64
+    files:
+      - LICENSE
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+
+brews:
+  - tap:
+      owner: bitcomplete
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    description:
+    homepage: "https://github.com/bitcomplete/gcp-runbatch"
+    test: system "#{bin}/gcp-runbatch --version"

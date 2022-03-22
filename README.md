@@ -15,11 +15,11 @@ invoked in several ways described below.
 
 For more details see `runbatch.go`.
 
-## Command line tool: `cmd/runbatch/main.go`
+## Command line tool: `cmd/gcp-runbatch/main.go`
 
 This is a wrapper around `Start` that accepts command line parameters for the
 inputs described above. For more details run:
-`go run cmd/runbatch/main.go --help`.
+`go run cmd/gcp-runbatch/main.go --help`.
 
 ## GCP Cloud Function: `function.StartRunBatch`
 
