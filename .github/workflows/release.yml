@@ -1,7 +1,7 @@
 on:
   push:
     tags:
-      - '*'
+      - v[0-9]+.[0-9]+.[0-9]+
 
 jobs:
   goreleaser:
@@ -28,3 +28,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+
+      # Build and publish .zip archive for Cloud Function deploys.
+      - run: go mod vendor
+      - run: zip -r gcp-runbatch-${GITHUB_REF#refs/tags/}.zip LICENSE *.go startup.py vendor
+      - uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: bitcomplete-oss-q2tc
+          service_account_key: ${{ secrets.GCP_PUBLIC_BUCKET_WRITER_SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+      - run: gsutil cp gcp-runbatch-${GITHUB_REF#refs/tags/}.zip gs://bitcomplete-oss-public/gcp-runbatch/function/
