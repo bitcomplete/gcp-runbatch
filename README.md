@@ -34,3 +34,11 @@ gcloud functions deploy runbatch-start \
   --runtime=go116 \
   --entry-point=Function
 ```
+
+## Release process
+
+Make sure that the git repo is clean and up to date with origin/main. Then run:
+
+```
+(read -r v && git tag -a v$v -m v$v && git push origin v$v)
+```
