@@ -1,30 +1,65 @@
-# runbatch
+# gcp-runbatch
 
-runbatch is a tool for running a docker container in a transient GCE VM
+gcp-runbatch is a tool for running a docker container in a transient GCE VM
 instance. The instance will be deleted once the container exits. It can be
-invoked in several ways described below.
+invoked as a command line tool, or as a GCP Cloud Function.
 
-## Go function `runbatch.Start()`
+## Installation
 
-`Start` accepts an `Input` struct specifying at a minimum:
+### Mac
 
-* GCP project ID where the VM instance will be created.
-* GCP zone where the VM instance will be created.
-* GCP service account that will run the workload.
-* Fully qualified docker image name for the workload to run.
+```
+brew tap bitcomplete/tap
+brew update
+brew install gcp-runbatch
+```
 
-For more details see `runbatch.go`.
+### Linux
 
-## Command line tool: `cmd/gcp-runbatch/main.go`
+Download the appropriate Linux archive from the [latest
+release](https://github.com/bitcomplete/gcp-runbatch/releases/latest) and copy
+the binary to your PATH.
 
-This is a wrapper around `Start` that accepts command line parameters for the
-inputs described above. For more details run:
-`go run cmd/gcp-runbatch/main.go --help`.
+## Usage
 
-## GCP Cloud Function: `function.StartRunBatch`
+### Command line
 
-This is a wrapper around `Start` that accepts its input as JSON. To deploy to
-GCP, run:
+To execute a Docker image in a dedicated VM, run the gcp-runbatch command as
+follows:
+
+```
+gcp-runbatch \
+  --project-id=PROJECT_ID \
+  --zone=ZONE \
+  --service-account=SERVICE_ACCOUNT \
+  IMAGE
+```
+
+Once the image process exits, the VM will be deleted. `IMAGE` should be a
+reference to a Docker image recognized by `docker run`, e.g. an image name on
+hub.docker.com, or a full Artifact Registry image URL.
+
+Here's an example invocation:
+
+```
+$ gcp-runbatch \
+  --project-id=long-octane-350517 \
+  --zone=us-central1-a \
+  --service-account=1234567890-compute@developer.gserviceaccount.com \
+  hello-world
+Successfully started instance runbatch-38408320. To tail batch logs run:
+CLOUDSDK_PYTHON_SITEPACKAGES=1 gcloud beta --project=long-octane-350517
+logging tail 'logName="projects/long-octane-350517/logs/runbatch" AND
+resource.labels.instance_id="runbatch-38408320"' --format='get(text_payload)'
+```
+
+Running the `gcloud beta logging` command that gets printed will allow you to
+tail the command logs.
+
+### GCP Cloud Function
+
+It's straightforward to deploy runbatch as a Cloud Function. Clone the repo and
+then deploy using `gcloud functions deploy`:
 
 ```
 go mod vendor
@@ -33,12 +68,4 @@ gcloud functions deploy runbatch-start \
   --no-allow-unauthenticated \
   --runtime=go116 \
   --entry-point=Function
-```
-
-## Release process
-
-Make sure that the git repo is clean and up to date with origin/main. Then run:
-
-```
-(read -r v && git tag -a v$v -m v$v && git push origin v$v)
 ```
