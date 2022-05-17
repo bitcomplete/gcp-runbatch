@@ -1,5 +1,7 @@
 # gcp-runbatch
 
+[![Documentation](https://godoc.org/github.com/bitcomplete/gcp-runbatch?status.svg)](http://godoc.org/github.com/bitcomplete/gcp-runbatch)
+
 gcp-runbatch is a tool for running a docker container in a transient GCE VM
 instance. The instance will be deleted once the container exits. It can be
 invoked as a command line tool, or as a GCP Cloud Function.
